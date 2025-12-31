@@ -68,7 +68,7 @@ This project acts as a **bridge between Telegram/GDrive storage and Stremio stre
 
 When you **forward Telegram files** or **send Google Drive links** to your **AUTH CHANNEL**, the bot automatically:
 
-1.  🗃️ **Stores** the reference (message_id or file_id) in the database.
+1.  🗃️ **Stores** the reference (`message_id` or `gdrive_id`) in the database.
 2.  🧠 **Processes** file captions or filenames to extract key metadata (title, year, quality, etc.).
 3.  🌐 **Generates a streaming URL** routed by **FastAPI**.
 4.  🎞️ **Provides Stremio Addon APIs**:
@@ -78,17 +78,14 @@ When you **forward Telegram files** or **send Google Drive links** to your **AUT
 
 ### Upload Guidelines
 
-To ensure proper metadata extraction and seamless integration with **Stremio**, all uploaded media files **must include specific details** in their captions (Telegram) or filenames (Google Drive).
+To ensure proper metadata extraction and seamless integration with **Stremio**, all uploaded Telegram media files **must include specific details** in their captions.
 
 #### 🎥 For Movies
 
-**Example Caption / Filename:**
-
+**Example Caption:**
 
 ```
-
 Ghosted 2023 720p 10bit WEBRip [Org APTV Hindi AAC 2.0CH + English 6CH] x265 HEVC Msub ~ PSA.mkv
-
 ```
 
 **Required Fields:**
@@ -101,14 +98,11 @@ Ghosted 2023 720p 10bit WEBRip [Org APTV Hindi AAC 2.0CH + English 6CH] x265 HEV
 
 #### 📺 For TV Shows
 
-**Example Caption / Filename:**
-
+**Example Caption:**
 
 ```
-
 Harikatha.Sambhavami.Yuge.Yuge.S01E04.Dark.Hours.1080p.WEB-DL.DUAL.DDP5.1.Atmos.H.264-Spidey.mkv
-
-```
+````
 
 **Required Fields:**
 
@@ -121,14 +115,14 @@ Harikatha.Sambhavami.Yuge.Yuge.S01E04.Dark.Hours.1080p.WEB-DL.DUAL.DDP5.1.Atmos.
 
 #### 📂 For Google Drive
 
-1.  Make sure your **Service Account** email has access to the file (add the service account email as a "Viewer" on the file or folder in Google Drive).
-2.  Send the **Shareable Link** of the file to your **AUTH CHANNEL**.
-    * *Example:* `https://drive.google.com/file/d/123456789ABCDEF/view?usp=sharing`
-3.  The bot will automatically extract metadata from the **file name** on Google Drive. Ensure the file name follows the conventions above.
+1.  **Service Account Access:** Ensure your **Service Account Email** has "Viewer" access to the files or folders you want to add.
+2.  **Send Link:** Paste the shareable link in your **AUTH CHANNEL**.
+    * **Single File:** The bot imports it immediately.
+    * **Folder:** The bot recursively scans and imports all video files inside the folder.
 
 ### 🔁 Quality Replacement Logic
 
-When you upload multiple files with the **same quality label** (like `720p` or `1080p`) for the same source (Telegram or GDrive),
+When you upload multiple files with the **same quality label** (like `720p` or `1080p`) for the same source,
 the **latest file automatically replaces the old one**.
 
 > Example:
@@ -159,7 +153,7 @@ Here's how each component interacts:
 | Component | Role |
 | :--- | :--- |
 | **Telegram Bot** | Handles uploads, forwards, and file tracking. |
-| **Google Drive** | (Optional) Alternative storage source for media files. |
+| **Google Drive** | Optional storage source for media files. |
 | **MongoDB** | Stores message IDs, file IDs, and metadata. |
 | **PyroFork** | Generates Telegram-based streaming URLs. |
 | **FastAPI** | Hosts REST endpoints for streaming, catalog, and metadata. |
@@ -224,7 +218,7 @@ All environment variables for this project are defined in the `config.env` file.
 | **`BOT_TOKEN`** | The main bot’s **access token** from [@BotFather](https://t.me/BotFather). Handles user requests and media fetching. |
 | **`HELPER_BOT_TOKEN`** | **Secondary bot token** used to assist the main bot with tasks like deleting, editing, or managing. |
 | **`OWNER_ID`** | Your **Telegram user ID**. This ID has full administrative access. |
-| **`REPLACE_MODE`** | When `true`, new files replace existing files of the same quality. When `false`, multiple files of the same quality are allowed. |
+| **`REPLACE_MODE`** | When `true`, new files replace existing files of the same quality. |
 | **`GDRIVE_SECRET`** | **(Optional)** Path to your **Google Service Account JSON** file (e.g. `service_account.json`). Required if using Google Drive links. |
 
 ### 🗄️ Storage
@@ -317,7 +311,7 @@ nano config.env
 ```
 
 * Fill in all required variables in `config.env`.
-* If using **Google Drive**, upload your `service_account.json` to this directory and update `GDRIVE_SECRET` in `config.env` to point to it (e.g., `GDRIVE_SECRET=service_account.json`).
+* If using **Google Drive**, place your `service_account.json` file in this directory and update `GDRIVE_SECRET` in `config.env` to match the filename.
 * Press `Ctrl + O`, then `Enter`, then `Ctrl + X` to save and exit.
 
 ## ⚙️ Step 2: Choose Your Deployment Method
@@ -544,6 +538,4 @@ If you want to use **only** your **Telegram Stremio Media Server addon** for met
 |:---:|:---:|:---:|
 |[`Karan`](https://github.com/Weebzone)|[`Stremio`](https://github.com/Stremio)|[`ChatGPT`](https://github.com/OPENAI)|
 |Author|Stremio SDK|Refactor
-```
-
 ```
