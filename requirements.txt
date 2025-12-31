@@ -1,0 +1,14 @@
+aiofiles
+fastapi
+httpx
+motor
+parse-torrent-title
+pyrofork
+python-dotenv
+pytz
+tgcrypto
+themoviedb
+uvicorn
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
