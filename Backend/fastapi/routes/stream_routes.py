@@ -67,14 +67,13 @@ async def gdrive_streamer(request: Request, file_id: str, filename: str):
     if not meta:
          raise HTTPException(status_code=404, detail="File not found on Drive")
          
-    file_size = int(meta.get('size'))
+    file_size = int(meta.get('size', 0))
     from_bytes, until_bytes = parse_range_header(range_header, file_size)
     
-    token = gdrive_client.creds.token 
-    if not gdrive_client.creds.valid:
-        from google.auth.transport.requests import Request as GRequest
-        gdrive_client.creds.refresh(GRequest())
-        token = gdrive_client.creds.token
+    # Use the cleaner helper method
+    token = gdrive_client.get_access_token()
+    if not token:
+        raise HTTPException(status_code=500, detail="Failed to get GDrive Token")
 
     headers = {
         "Authorization": f"Bearer {token}",
@@ -83,6 +82,7 @@ async def gdrive_streamer(request: Request, file_id: str, filename: str):
     
     async def gdrive_generator():
         async with httpx.AsyncClient() as client:
+            # We connect to the Drive API media endpoint
             async with client.stream("GET", f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media", headers=headers) as response:
                 async for chunk in response.aiter_bytes():
                     yield chunk
