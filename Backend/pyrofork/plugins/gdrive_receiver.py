@@ -16,11 +16,15 @@ async def process_gdrive_link():
         data = await gdrive_queue.get()
         # data: (metadata_info, file_info)
         async with db_lock:
-            await db.insert_media(
+            updated_id = await db.insert_media(
                 data[0], 
                 source_data=data[1], 
                 source_type="gdrive"
             )
+            if updated_id:
+                LOGGER.info(f"[GDrive] Processed: {data[1]['name']}")
+            else:
+                LOGGER.warning(f"[GDrive] Failed to insert: {data[1]['name']}")
         gdrive_queue.task_done()
 
 create_task(process_gdrive_link())
@@ -35,10 +39,36 @@ async def gdrive_handler(client: Client, message: Message):
             return
 
         file_meta = await gdrive_client.get_file_metadata(file_id)
-        if not file_meta or file_meta.get('mimeType') == 'application/vnd.google-apps.folder':
-            await message.reply_text("❌ Invalid File or is a Folder.")
+        if not file_meta:
+            await message.reply_text("❌ Could not fetch metadata. Check permissions.")
             return
 
+        # --- FOLDER HANDLING ---
+        if file_meta.get('mimeType') == 'application/vnd.google-apps.folder':
+            status_msg = await message.reply_text("📂 <b>Folder Detected!</b> Scanning for videos...", quote=True)
+            files = await gdrive_client.get_files_in_folder(file_id)
+            
+            if not files:
+                await status_msg.edit_text("❌ No video files found in this folder.")
+                return
+
+            count = 0
+            for file in files:
+                name = file.get('name')
+                size = get_readable_file_size(int(file.get('size', 0)))
+                id_data = {"gdrive_id": file.get('id')}
+                
+                # We assume file is a video because get_files_in_folder filters by 'video/'
+                metadata_info = await metadata(name, id_data, is_gdrive=True)
+                
+                if metadata_info:
+                    await gdrive_queue.put((metadata_info, {"name": name, "size": size}))
+                    count += 1
+            
+            await status_msg.edit_text(f"✅ <b>Folder Processed!</b>\nQueued {count} video files.")
+            return
+
+        # --- SINGLE FILE HANDLING ---
         name = file_meta.get('name')
         size = get_readable_file_size(int(file_meta.get('size', 0)))
         
