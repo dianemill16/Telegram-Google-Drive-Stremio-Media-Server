@@ -193,7 +193,7 @@ The `/set` command is used to manually upload a specific Movie or TV show to you
 **Example:**
 
 ```
-/set [https://m.imdb.com/title/tt665723](https://m.imdb.com/title/tt665723)
+/set https://m.imdb.com/title/tt665723
 ```
 
 **Steps:**
@@ -391,8 +391,8 @@ Go to your domain registrar and add an **A record** pointing to your VPS IP:
 
 ```bash
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
-curl -1sLf '[https://dl.cloudsmith.io/public/caddy/stable/gpg.key](https://dl.cloudsmith.io/public/caddy/stable/gpg.key)' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-curl -1sLf '[https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt](https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt)' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
 chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 chmod o+r /etc/apt/sources.list.d/caddy-stable.list
 sudo apt update
