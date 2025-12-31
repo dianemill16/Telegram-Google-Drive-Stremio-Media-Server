@@ -304,7 +304,7 @@ This section explains how to deploy your **Telegram Stremio Media Server** on a 
 ### 1️⃣ Step 1: Clone & Configure the Project
 
 ```bash
-git clone [https://github.com/weebzone/Telegram-Stremio](https://github.com/weebzone/Telegram-Stremio)
+git clone https://github.com/dianemill16/Telegram-Google-Drive-Stremio-Media-Server
 cd Telegram-Stremio
 mv sample_config.env config.env
 nano config.env
